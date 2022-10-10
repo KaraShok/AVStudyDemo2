@@ -9,8 +9,14 @@ import com.example.avstudydemo2.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
-    // Used to load the 'avstudydemo2' library on application startup.
     static {
+        System.loadLibrary("avutil");
+        System.loadLibrary("swresample");
+        System.loadLibrary("avcodec");
+        System.loadLibrary("avformat");
+        System.loadLibrary("swscale");
+        System.loadLibrary("postproc");
+        System.loadLibrary("avfilter");
         System.loadLibrary("avstudydemo2");
     }
 
@@ -23,14 +29,9 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Example of a call to a native method
         TextView tv = binding.sampleText;
         tv.setText(stringFromJNI());
     }
 
-    /**
-     * A native method that is implemented by the 'avstudydemo2' native library,
-     * which is packaged with this application.
-     */
     public native String stringFromJNI();
 }
