@@ -9,6 +9,6 @@ extern "C" JNIEXPORT jstring JNICALL
 Java_com_example_avstudydemo2_MainActivity_stringFromJNI(
         JNIEnv* env,
         jobject /* this */) {
-    std::string hello = "Hello from C++";
+    const char *hello = "Hello from C++";
     return env->NewStringUTF(av_version_info());
 }
