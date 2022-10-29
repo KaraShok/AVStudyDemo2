@@ -68,11 +68,12 @@ public class DemoPlayer implements SurfaceHolder.Callback {
      * 停止播放
      */
     public void stop() {
-
+        nativeStop();
     }
 
     public void release() {
         holder.removeCallback(this);
+        nativeRelease();
     }
 
     /**
@@ -110,7 +111,12 @@ public class DemoPlayer implements SurfaceHolder.Callback {
 
 
     native void nativePrepare(String dataSource);
+
     native void nativeStart();
+
+    native void nativeStop();
+
+    native void nativeRelease();
 
     native void nativeSetSurface(Surface surface);
 }

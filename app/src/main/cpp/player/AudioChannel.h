@@ -31,12 +31,15 @@ public:
     int outChannels;
     int outSampleSize;
     int outSampleRate;
+    double clock;
 
-    AudioChannel(int id,AVCodecContext *avCodecContext);
+    AudioChannel(int id,AVCodecContext *avCodecContext, AVRational rational);
 
     ~AudioChannel();
 
     void play();
+
+    void stop();
 
     void decode();
 

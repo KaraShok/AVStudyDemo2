@@ -67,10 +67,16 @@ void DemoPlayer::runPrepare() {
             javaCallHelper->onError(THREAD_CHILD, FFMPEG_OPEN_DECODER_FAIL);
             return;
         }
+
+        AVRational timeBase = stream->time_base;
+
         if (parameters->codec_type == AVMEDIA_TYPE_AUDIO) {
-            audioChannel = new AudioChannel(i,context);
+            audioChannel = new AudioChannel(i,context,timeBase);
         } else if (parameters->codec_type == AVMEDIA_TYPE_VIDEO) {
-            videoChannel = new VideoChannel(i,context);
+            AVRational frameRate = stream->avg_frame_rate;
+            int fps = av_q2d(frameRate);
+
+            videoChannel = new VideoChannel(i,context,timeBase,fps);
             videoChannel->setRenderFrameCallback(renderFrameCallback);
         }
     }
@@ -87,6 +93,17 @@ void DemoPlayer::runPrepare() {
 void DemoPlayer::runStart() {
     int ret;
     while (isPlaying) {
+
+        if (audioChannel && audioChannel->packets.size() > 100) {
+            av_usleep(1000 * 10);
+            continue;
+        }
+
+        if (videoChannel && videoChannel->packets.size() > 100) {
+            av_usleep(1000 * 10);
+            continue;
+        }
+
         AVPacket *packet = av_packet_alloc();
         ret = av_read_frame(avFormatContext, packet);
         //=0成功 其他:失败
@@ -100,11 +117,13 @@ void DemoPlayer::runStart() {
             }
         } else if (ret == AVERROR_EOF) {
             //读取完成 但是可能还没播放完
-
+            if (audioChannel->packets.empty() && audioChannel->frames.empty()
+                && videoChannel->packets.empty() && videoChannel->frames.empty()) {
+                break;
+            }
         } else {
             //
         }
-
     }
 }
 
@@ -116,12 +135,14 @@ void* taskStart(void *args) {
 
 void DemoPlayer::start() {
     isPlaying = 1;
-    if (videoChannel) {
-        videoChannel->play();
-    }
 
     if (audioChannel) {
         audioChannel->play();
+    }
+
+    if (videoChannel) {
+        videoChannel->setAudioChannel(audioChannel);
+        videoChannel->play();
     }
 
     pthread_create(&pidStart,0,taskStart, this);
@@ -129,4 +150,13 @@ void DemoPlayer::start() {
 
 void DemoPlayer::setRenderFrameCallback(RenderFrameCallback callback) {
     renderFrameCallback = callback;
+}
+
+void *taskStop(void *args) {
+
+    return 0;
+}
+
+void DemoPlayer::stop() {
+
 }

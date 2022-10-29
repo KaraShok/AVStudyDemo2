@@ -20,17 +20,18 @@ class DemoPlayer {
 private:
     char *videoUrl = 0;
     int isPlaying;
-    pthread_t pidPrepare;
-    pthread_t pidStart;
-    AVFormatContext *avFormatContext = 0;
+    pthread_t pidStop;
     JavaCallHelper *javaCallHelper = 0;
-    AudioChannel *audioChannel = 0;
-    VideoChannel *videoChannel = 0;
     RenderFrameCallback  renderFrameCallback;
 
-
-
 public:
+
+    pthread_t pidPrepare;
+    pthread_t pidStart;
+    AudioChannel *audioChannel = 0;
+    VideoChannel *videoChannel = 0;
+    AVFormatContext *avFormatContext = 0;
+
     DemoPlayer(JavaCallHelper *helper, const char *url);
 
     ~DemoPlayer();
@@ -38,6 +39,8 @@ public:
     void prepare();
 
     void start();
+
+    void stop();
 
     void runPrepare();
 

@@ -4,8 +4,17 @@
 
 #include "VideoChannel.h"
 
-VideoChannel::VideoChannel(int id, AVCodecContext *context) : BaseChannel(id, context) {
-
+void dropAVFrame(queue<AVFrame*> &q) {
+    if (!q.empty()) {
+        AVFrame *frame = q.front();
+        BaseChannel::freeAVFrame(&frame);
+        q.pop();
+    }
+}
+VideoChannel::VideoChannel(int id, AVCodecContext *context, AVRational rational,int fps):
+    BaseChannel(id, context,rational) {
+    this->fps = fps;
+    frames.setSyncHandle(dropAVFrame);
 }
 
 VideoChannel::~VideoChannel() {
@@ -102,6 +111,12 @@ void VideoChannel::render() {
                 dstLineSize
                 );
 
+        res = syncAudioAndVideo(frame);
+
+        if (!res) {
+            continue;
+        }
+
         renderFrameCallback(
                 dstData[0],
                 dstLineSize[0],
@@ -111,10 +126,52 @@ void VideoChannel::render() {
 
         freeAVFrame(&frame);
     }
+
+    isPlaying = 0;
+
     av_freep(&dstData[0]);
     freeAVFrame(&frame);
+
+    sws_freeContext(swsContext);
+    swsContext = 0;
 }
 
 void VideoChannel::setRenderFrameCallback(RenderFrameCallback callback) {
     renderFrameCallback = callback;
+}
+
+void VideoChannel::setAudioChannel(AudioChannel *channel) {
+    audioChannel = channel;
+}
+
+int VideoChannel::syncAudioAndVideo(AVFrame *frame) {
+    int res = 1;
+    double frameDelays = 1.0 / fps;
+    double videoClock = frame->best_effort_timestamp * av_q2d(timeBase);
+    double extraDelay = frame->repeat_pict / (2 * fps);
+    double delays = extraDelay + frameDelays;
+    if (!audioChannel) {
+        av_usleep(delays * 1000000);
+    } else {
+        if (videoClock == 0) {
+            av_usleep(delays * 1000000);
+        } else {
+            double audioClock = audioChannel->clock;
+            double diff = videoClock - audioClock;
+            if (diff > 0) {
+                av_usleep((delays + diff) * 1000000);
+            } else if (diff < 0) {
+                if (fabs(diff) > 0.03) {
+                    freeAVFrame(&frame);
+                    frames.sync();
+                    res = 0;
+                }
+            }
+        }
+    }
+    return res;
+}
+
+void VideoChannel::stop() {
+
 }

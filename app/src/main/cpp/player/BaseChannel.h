@@ -18,8 +18,12 @@ public:
     AVCodecContext *avCodecContext;
     SafeQueue<AVPacket*> packets;
     SafeQueue<AVFrame*> frames;
+    AVRational timeBase;
 
-    BaseChannel(int id, AVCodecContext *context): id(id), avCodecContext(context) {
+    BaseChannel(int id, AVCodecContext *context,AVRational rational):
+        id(id),
+        avCodecContext(context),
+        timeBase(rational) {
 
     }
 
@@ -29,6 +33,8 @@ public:
     }
 
     virtual void play() = 0;
+
+    virtual void stop() = 0;
 
     static void freeAVPacket(AVPacket **packet) {
         if (packet) {

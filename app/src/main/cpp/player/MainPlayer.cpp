@@ -6,6 +6,7 @@
 #include <string>
 #include <android/native_window_jni.h>
 #include "DemoPlayer.h"
+#include "macro.h"
 
 DemoPlayer *player = 0;
 
@@ -66,8 +67,18 @@ JNIEXPORT void JNICALL Java_com_example_avstudydemo2_player_DemoPlayer_nativeSta
     player->start();
 }
 
+JNIEXPORT void JNICALL Java_com_example_avstudydemo2_player_DemoPlayer_nativeStop
+        (JNIEnv *env, jobject jobj) {
+
+}
+
+JNIEXPORT void JNICALL Java_com_example_avstudydemo2_player_DemoPlayer_nativeRelease
+        (JNIEnv *env, jobject jobj) {
+
+}
+
 JNIEXPORT void JNICALL Java_com_example_avstudydemo2_player_DemoPlayer_nativeSetSurface
-        (JNIEnv *env, jobject, jobject surface) {
+        (JNIEnv *env, jobject jobj, jobject surface) {
     pthread_mutex_lock(&mutex);
     if (window) {
         ANativeWindow_release(window);
