@@ -11,9 +11,9 @@ import com.example.avstudydemo2.R;
 public class DemoPlayerActivity extends AppCompatActivity {
 
     private DemoPlayer player;
-//    public String url = "http://live.cgtn.com/500/prog_index.m3u8";
+    public String url = "http://live.cgtn.com/500/prog_index.m3u8";
 //    public String url = "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8";
-    public String url = "http://liveop.cctv.cn/hls/4KHD/playlist.m3u8";
+//    public String url = "http://liveop.cctv.cn/hls/4KHD/playlist.m3u8";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,5 +46,17 @@ public class DemoPlayerActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         player.prepare();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        player.stop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        player.release();
     }
 }

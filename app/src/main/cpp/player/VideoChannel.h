@@ -29,7 +29,7 @@ private:
     int syncAudioAndVideo(AVFrame *frame);
 
 public:
-    VideoChannel(int id, AVCodecContext *context, AVRational rational,int fps);
+    VideoChannel(int id, AVCodecContext *context, AVRational rational,int fps, JavaCallHelper *javaCallHelper);
 
     ~VideoChannel();
 

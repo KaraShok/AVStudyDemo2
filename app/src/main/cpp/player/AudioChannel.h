@@ -23,7 +23,7 @@ private:
     SLObjectItf outputMixObject = 0;
     SLObjectItf bqPlayerObject = 0;
     SLPlayItf  bqPlayerInterface = 0;
-    SLAndroidSimpleBufferQueueItf bqPlayerBufferQueueInterface = 0;
+    SLAndroidSimpleBufferQueueItf bqPlayerBufferQueueItf = 0;
     SwrContext *swrContext = 0;
 
 public:
@@ -33,7 +33,7 @@ public:
     int outSampleRate;
     double clock;
 
-    AudioChannel(int id,AVCodecContext *avCodecContext, AVRational rational);
+    AudioChannel(int id,AVCodecContext *avCodecContext, AVRational rational, JavaCallHelper *javaCallHelper);
 
     ~AudioChannel();
 

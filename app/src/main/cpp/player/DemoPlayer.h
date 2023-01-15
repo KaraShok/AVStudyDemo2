@@ -19,13 +19,16 @@ extern  "C" {
 class DemoPlayer {
 private:
     char *videoUrl = 0;
-    int isPlaying;
+    int isSeek = 0;
+    int duration = 0;
     pthread_t pidStop;
+    pthread_mutex_t seekMutex;
     JavaCallHelper *javaCallHelper = 0;
     RenderFrameCallback  renderFrameCallback;
 
 public:
 
+    int isPlaying;
     pthread_t pidPrepare;
     pthread_t pidStart;
     AudioChannel *audioChannel = 0;
@@ -47,5 +50,11 @@ public:
     void runStart();
 
     void setRenderFrameCallback(RenderFrameCallback callback);
+
+    int getDuration() {
+        return duration;
+    }
+
+    void seek(int i);
 };
 #endif //AVSTUDYDEMO2_DEMOPLAYER_H

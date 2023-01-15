@@ -9,6 +9,7 @@
 #include "macro.h"
 
 DemoPlayer *player = 0;
+JavaCallHelper *javaCallHelper = 0;
 
 JavaVM *javaVm = 0;
 ANativeWindow *window = 0;
@@ -55,8 +56,8 @@ extern "C" {
 JNIEXPORT void JNICALL Java_com_example_avstudydemo2_player_DemoPlayer_nativePrepare
         (JNIEnv *env, jobject jobj, jstring url) {
     const char *videoUrl = env->GetStringUTFChars(url,0);
-    JavaCallHelper *helper = new JavaCallHelper(javaVm,env,jobj);
-    player = new DemoPlayer(helper,videoUrl);
+    javaCallHelper = new JavaCallHelper(javaVm,env,jobj);
+    player = new DemoPlayer(javaCallHelper,videoUrl);
     player->setRenderFrameCallback(render);
     player->prepare();
     env->ReleaseStringUTFChars(url,videoUrl);
@@ -64,17 +65,27 @@ JNIEXPORT void JNICALL Java_com_example_avstudydemo2_player_DemoPlayer_nativePre
 
 JNIEXPORT void JNICALL Java_com_example_avstudydemo2_player_DemoPlayer_nativeStart
         (JNIEnv *, jobject) {
-    player->start();
+    if (player) {
+        player->start();
+    }
 }
 
 JNIEXPORT void JNICALL Java_com_example_avstudydemo2_player_DemoPlayer_nativeStop
         (JNIEnv *env, jobject jobj) {
-
+    if (player) {
+        player->stop();
+    }
+    DELETE(javaCallHelper);
 }
 
 JNIEXPORT void JNICALL Java_com_example_avstudydemo2_player_DemoPlayer_nativeRelease
         (JNIEnv *env, jobject jobj) {
-
+    pthread_mutex_lock(&mutex);
+    if (window) {
+        ANativeWindow_release(window);
+        window = 0;
+    }
+    pthread_mutex_unlock(&mutex);
 }
 
 JNIEXPORT void JNICALL Java_com_example_avstudydemo2_player_DemoPlayer_nativeSetSurface
@@ -88,4 +99,18 @@ JNIEXPORT void JNICALL Java_com_example_avstudydemo2_player_DemoPlayer_nativeSet
     pthread_mutex_unlock(&mutex);
 }
 
+JNIEXPORT void JNICALL Java_com_example_avstudydemo2_player_DemoPlayer_nativeSeek
+        (JNIEnv *env, jobject jobj, jint progress) {
+    if (player) {
+        player->seek(progress);
+    }
+}
+
+JNIEXPORT jint JNICALL Java_com_example_avstudydemo2_player_DemoPlayer_nativeGetDuration
+        (JNIEnv *env, jobject jobj) {
+    if (player) {
+        return player->getDuration();
+    }
+    return 0;
+}
 }

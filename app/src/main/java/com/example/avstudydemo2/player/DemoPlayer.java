@@ -28,12 +28,15 @@ public class DemoPlayer implements SurfaceHolder.Callback {
      * @param surfaceView
      */
     public void setSurfaceView(SurfaceView surfaceView) {
+        if (holder != null) {
+            holder.removeCallback(this);
+        }
         holder = surfaceView.getHolder();
         holder.addCallback(this);
     }
 
     public void onError(int errorCode){
-        System.out.println("Java接到回调:"+errorCode);
+        System.out.println("Java接到回调: onError " + errorCode);
     }
 
 
@@ -43,9 +46,14 @@ public class DemoPlayer implements SurfaceHolder.Callback {
         }
     }
 
+    public void onProgress(int progress) {
+        System.out.println("Java接到回调: onProgress " + progress);
+    }
+
     public void setOnPrepareListener(OnPrepareListener listener){
         this.listener = listener;
     }
+
     public interface OnPrepareListener{
         void onPrepare();
     }
@@ -119,4 +127,8 @@ public class DemoPlayer implements SurfaceHolder.Callback {
     native void nativeRelease();
 
     native void nativeSetSurface(Surface surface);
+
+    native void nativeSeek(int progress);
+
+    native int nativeGetDuration();
 }

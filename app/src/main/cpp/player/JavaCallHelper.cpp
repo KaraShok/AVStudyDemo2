@@ -12,6 +12,7 @@ JavaCallHelper::JavaCallHelper(JavaVM *vm, JNIEnv *env, jobject jobj) {
     jclass jcls = env->GetObjectClass(jobj);
     onErrorId = env->GetMethodID(jcls,"onError","(I)V");
     onPrepareId = env->GetMethodID(jcls,"onPrepare","()V");
+    onProgressId = env->GetMethodID(jcls,"onProgress","(I)V");
 }
 
 JavaCallHelper::~JavaCallHelper() {
@@ -23,7 +24,9 @@ void JavaCallHelper::onError(int thread, int code) {
         jniEnv->CallVoidMethod(instance,onErrorId,code);
     } else {
         JNIEnv *env;
-        javaVm->AttachCurrentThread(&env,0);
+        if (javaVm->AttachCurrentThread(&env, 0) != JNI_OK) {
+            return;
+        }
         env->CallVoidMethod(instance,onErrorId,code);
         javaVm->DetachCurrentThread();
     }
@@ -34,8 +37,23 @@ void JavaCallHelper::onPrepare(int thread) {
         jniEnv->CallVoidMethod(instance,onPrepareId);
     } else {
         JNIEnv *env;
-        javaVm->AttachCurrentThread(&env,0);
+        if (javaVm->AttachCurrentThread(&env, 0) != JNI_OK) {
+            return;
+        }
         env->CallVoidMethod(instance,onPrepareId);
         javaVm->DetachCurrentThread();
+    }
+}
+
+void JavaCallHelper::onProgress(int thread, int progress) {
+    if (thread == THREAD_CHILD) {
+        JNIEnv *env;
+        if (javaVm->AttachCurrentThread(&env, 0) != JNI_OK) {
+            return;
+        }
+        env->CallVoidMethod(instance, onProgressId, progress);
+        javaVm->DetachCurrentThread();
+    } else {
+        jniEnv->CallVoidMethod(instance, onProgressId, progress);
     }
 }

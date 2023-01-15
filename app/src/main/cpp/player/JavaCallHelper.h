@@ -15,6 +15,7 @@ private:
     jobject instance;
     jmethodID onErrorId;
     jmethodID onPrepareId;
+    jmethodID onProgressId;
 
 public:
     JavaCallHelper(JavaVM *vm, JNIEnv *env, jobject jobj);
@@ -24,5 +25,7 @@ public:
     void onError(int thread, int code);
 
     void onPrepare(int thread);
+
+    void onProgress(int thread, int progress);
 };
 #endif //AVSTUDYDEMO2_JAVACALLHELPER_H
